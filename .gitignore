@@ -1,0 +1,6 @@
+arduno/.pio
+arduino/.stuff
+arduino/.vscode
+arduino/.gitignore
+arduino/include/arduino_secrets.h
+arduino/test/
