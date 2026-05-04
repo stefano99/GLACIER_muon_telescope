@@ -152,7 +152,7 @@ void setup() {
 // ## LOOP ##
 // ##########
 void loop() {
-    delay(100);  // small delay to avoid busy wait
+    delay(LOOPPERIOD);  // small delay to avoid busy wait
 
     // sync RTC DS1307 with NTP if needed
     // if RTC crashed, try reinitialize and sync

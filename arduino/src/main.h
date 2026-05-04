@@ -1,7 +1,7 @@
 #pragma once
 
-#define DEBUG 0             // set to 1 to enable debug prints
-
+#define DEBUG 1             // set to 1 to enable debug prints
+#define LOOPPERIOD 1000     // main loop period in milliseconds
 
 // pin definitions
 // VERIFY if pins labelet witn INTERRUP are interrupt-capable! 
