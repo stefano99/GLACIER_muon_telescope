@@ -20,7 +20,6 @@
 
 // FUNCTION DECLARATIONS HERE:
 int freeRam(); // DELETE 
-void display_freeram(); // DELETE
 static bool retryInit(const char* name, std::function<bool()> initFn, uint8_t maxRetries = 3, uint16_t retryDelayMs = 2000);
 
 //
@@ -78,7 +77,9 @@ void setup() {
     Serial.println("setup: debug mode is ON");
     Serial.println("setup: Serial initialized at 115200 bps");
     #endif
+    logMessage["id"] = DEVICE_ID;
     logMessage["type"] = "log";
+    logMessage["timestamp"] = "00:00:00";                           // placeholder timestamp for setup log message
     logMessage["message"] = "Setup started";
     
 
@@ -160,8 +161,17 @@ void loop() {
         #if DEBUG == 1 
         Serial.println("loop: RTC DS1307 crashed, trying to reinitialize and sync with NTP.");
         #endif
-        if(publisher.sync()) logMessage["rtc_reinitialized"] = true;
-        else logMessage["rtc_reinitialized"] = false;
+        logMessage["id"] = DEVICE_ID;
+        logMessage["type"] = "log";
+        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+        logMessage["message"] = "RTC DS1307 reinitialization attempt";
+        
+        if(publisher.sync()) {
+            logMessage["rtc_reinitialized"] = true;
+        }
+        else {
+            logMessage["rtc_reinitialized"] = false;
+        }
         sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
         logMessage.clear();
     }
@@ -175,6 +185,7 @@ void loop() {
 
         String timestamp = publisher.getRTCTimestamp();
 
+        message["id"] = DEVICE_ID;
         message["type"] = "muon";
 
         noInterrupts();  // disable interrupts to read muon count safely
@@ -187,8 +198,9 @@ void loop() {
 
         publisher.clearRTCirqFlagMuon(); // clear RTC IRQ flag
 
-        publisher.send(message);
         sd.write(data_filename, message.as<String>()); // log muon data to SD card
+        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        publisher.send(message);
         message.clear();
     }
 
@@ -207,6 +219,7 @@ void loop() {
         float dht22HumidityPct = event.relative_humidity;
 
         // send temperature sensor payload
+        message["id"] = DEVICE_ID;
         message["type"] = "temp-hum";
         message["timestamp"] = timestamp;
         message["tmp36TempC"] = tmp36.readTemperatureC();
@@ -218,13 +231,13 @@ void loop() {
 
         publisher.clearRTCirqFlagTemp(); // clear RTC IRQ flag
 
-        publisher.send(message);
         sd.write(data_filename, message.as<String>()); // log temp data to SD card
+        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        publisher.send(message);
         message.clear();
     }
 
     if(publisher.isRTCirqFlagSetDaily()) {
-        String sd_data = "";
 
         logMessage["type"] = "log";
         logMessage["message"] = "Daily summary";
@@ -298,8 +311,9 @@ void loop() {
         Serial.println("loop: Daily tasks done. time: " + publisher.getRTCTimestamp());
         display_freeram();
         #endif
-
+        
         sd.write(log_filename, logMessage.as<String>()); // log daily summary to SD card
+        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
         publisher.send(logMessage); // send daily summary
         logMessage.clear();
     }
@@ -325,12 +339,13 @@ static bool retryInit(const char* name, std::function<bool()> initFn, uint8_t ma
     return false;
 }
 
+// Define standard C memory allocation function
 extern "C" char* sbrk(int incr);
-void display_freeram(){
-  Serial.print(F("- SRAM left: "));
-  Serial.println(freeRam());
-}
+
 int freeRam() {
-  char top;
+  // A local variable to pinpoint the current bottom of the stack
+  char top; 
+  
+  // The distance between the stack pointer and the top of the heap
   return &top - reinterpret_cast<char*>(sbrk(0));
 }

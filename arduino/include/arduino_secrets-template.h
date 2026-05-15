@@ -1,9 +1,12 @@
 #pragma once
 #include "main.h"
 
+// device ID
+#define DEVICE_ID "<DEVICE_ID>"                             // CHANGE IT AS YOU DESIRE, but IT MUST BE 3 CHARACTERS LONG for database compatibility
+
 // WIFI credentials
-#define SECRET_SSID ""
-#define SECRET_PASS ""
+#define SECRET_SSID "<SSID>"
+#define SECRET_PASS "<PASSWORD>"
 
 
 // MQTT server details/credentials
