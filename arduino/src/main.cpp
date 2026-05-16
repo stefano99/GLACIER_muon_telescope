@@ -118,6 +118,19 @@ void setup() {
  
     data_filename = publisher.getDate() + data_extension;
 
+    if(sd.readSend(data_filename, publisher)) { // send muon and temp log data
+            #if DEBUG == 1 
+            Serial.println("loop: current day data sent successfully.");
+            #endif
+
+            logMessage["current-day_data_sent"] = true;
+    } else {
+            #if DEBUG == 1 
+            Serial.println("loop: Failed to send current day data.");
+            #endif
+
+            logMessage["current-_data_sent"] = false;
+    }
     // check overall status
     if(!(status_tmp36 && status_dht && status_muon && status_publisher && status_sd)) {
         #if DEBUG == 1
