@@ -19,7 +19,7 @@
 #define DHTTYPE DHT22         // DHT 22 (AM2302)
 
 // FUNCTION DECLARATIONS HERE:
-int freeRam(); // DELETE 
+// int freeRam(); // DELETE 
 static bool retryInit(const char* name, std::function<bool()> initFn, uint8_t maxRetries = 3, uint16_t retryDelayMs = 2000);
 
 //
@@ -213,7 +213,7 @@ void loop() {
         publisher.clearRTCirqFlagMuon(); // clear RTC IRQ flag
 
         sd.write(data_filename, message.as<String>()); // log muon data to SD card
-        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
         publisher.send(message);
         message.clear();
     }
@@ -246,7 +246,7 @@ void loop() {
         publisher.clearRTCirqFlagTemp(); // clear RTC IRQ flag
 
         sd.write(data_filename, message.as<String>()); // log temp data to SD card
-        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
         publisher.send(message);
         message.clear();
     }
@@ -324,11 +324,11 @@ void loop() {
 
         #if DEBUG == 1 
         Serial.println("loop: Daily tasks done. time: " + publisher.getRTCTimestamp());
-        display_freeram();
+        // display_freeram();
         #endif
         
         sd.write(log_filename, logMessage.as<String>()); // log daily summary to SD card
-        message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
         publisher.send(logMessage); // send daily summary
         logMessage.clear();
     }
@@ -355,12 +355,12 @@ static bool retryInit(const char* name, std::function<bool()> initFn, uint8_t ma
 }
 
 // Define standard C memory allocation function
-extern "C" char* sbrk(int incr);
+// extern "C" char* sbrk(int incr);
 
-int freeRam() {
-  // A local variable to pinpoint the current bottom of the stack
-  char top; 
+// int freeRam() {
+//   // A local variable to pinpoint the current bottom of the stack
+//   char top; 
   
-  // The distance between the stack pointer and the top of the heap
-  return &top - reinterpret_cast<char*>(sbrk(0));
-}
+//   // The distance between the stack pointer and the top of the heap
+//   return &top - reinterpret_cast<char*>(sbrk(0));
+// }
