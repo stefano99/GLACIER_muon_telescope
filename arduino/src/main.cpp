@@ -185,6 +185,7 @@ void loop() {
         else {
             logMessage["rtc_reinitialized"] = false;
         }
+        publisher.send(logMessage); // send RTC reinit status message
         sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
         logMessage.clear();
     }
@@ -252,6 +253,7 @@ void loop() {
 
     if(publisher.isRTCirqFlagSetDaily()) {
 
+        logMessage["id"] = DEVICE_ID;
         logMessage["type"] = "log";
         logMessage["message"] = "Daily summary";
         
