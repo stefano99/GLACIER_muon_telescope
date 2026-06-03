@@ -81,7 +81,7 @@ void setup() {
     logMessage["type"] = "log";
     logMessage["timestamp"] = "00:00:00";                           // placeholder timestamp for setup log message
     logMessage["message"] = "Setup started";
-    
+    logMessage["version"] = VERSION;                                // include software version in log message
 
 
     // hardware init with retries

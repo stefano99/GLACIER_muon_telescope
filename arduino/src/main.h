@@ -2,6 +2,7 @@
 
 #define DEBUG 0             // set to 1 to enable debug prints
 #define LOOPPERIOD 1000     // main loop period in milliseconds
+#define VERSION "1.0.1"         // software version
 
 // pin definitions
 // VERIFY if pins labelet witn INTERRUP are interrupt-capable! 
