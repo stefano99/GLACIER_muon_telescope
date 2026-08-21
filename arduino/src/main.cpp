@@ -167,6 +167,7 @@ void setup() {
 // ##########
 void loop() {
     delay(LOOPPERIOD);  // small delay to avoid busy wait
+    bool sdwrite_status = false;
 
     // sync RTC DS1307 with NTP if needed
     // if RTC crashed, try reinitialize and sync
@@ -185,8 +186,10 @@ void loop() {
         else {
             logMessage["rtc_reinitialized"] = false;
         }
+
+        sdwrite_status = sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
+        logMessage["sdwrite_status"] = sdwrite_status;
         publisher.send(logMessage); // send RTC reinit status message
-        sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
         logMessage.clear();
     }
     
@@ -212,10 +215,18 @@ void loop() {
 
         publisher.clearRTCirqFlagMuon(); // clear RTC IRQ flag
 
-        sd.write(data_filename, message.as<String>()); // log muon data to SD card
-        // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        sdwrite_status = sd.write(data_filename, message.as<String>()); // log muon data to SD card
         publisher.send(message);
         message.clear();
+
+        logMessage["id"] = DEVICE_ID;
+        logMessage["type"] = "log";
+        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+        logMessage["message"] = "SD write status for muon data";
+        logMessage["sdwrite_status"] = sdwrite_status;
+        
+        publisher.send(logMessage); // send SD write status message
+        logMessage.clear();
     }
 
     if(publisher.isRTCirqFlagSetTemp()) {
@@ -245,10 +256,19 @@ void loop() {
 
         publisher.clearRTCirqFlagTemp(); // clear RTC IRQ flag
 
-        sd.write(data_filename, message.as<String>()); // log temp data to SD card
+        sdwrite_status = sd.write(data_filename, message.as<String>()); // log temp data to SD card
         // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
         publisher.send(message);
         message.clear();
+        
+        logMessage["id"] = DEVICE_ID;
+        logMessage["type"] = "log";
+        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+        logMessage["message"] = "SD write status for muon data";
+        logMessage["sdwrite_status"] = sdwrite_status;
+
+        publisher.send(logMessage); // send SD write status message
+        logMessage.clear();
     }
 
     if(publisher.isRTCirqFlagSetDaily()) {
@@ -327,8 +347,10 @@ void loop() {
         // display_freeram();
         #endif
         
-        sd.write(log_filename, logMessage.as<String>()); // log daily summary to SD card
+        sdwrite_status = sd.write(log_filename, logMessage.as<String>()); // log daily summary to SD card
         // message["freeRam"] = freeRam(); // include free RAM in message for monitoring
+        logMessage["sdwrite_status"] = sdwrite_status;
+        
         publisher.send(logMessage); // send daily summary
         logMessage.clear();
     }

@@ -84,7 +84,7 @@ bool SDCard::readSend(String filename, Publisher_mqtt& publisher) {
         Serial.println(data.as<String>());
         #endif
         data.clear(); //clear document for next read
-        delay(10); //small delay to avoid overwhelming MQTT broker
+        delay(10); //small delay to prevent overwhelming the Arduino
     }
 
     file.close(); //close file
