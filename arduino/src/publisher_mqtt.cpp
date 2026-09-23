@@ -603,10 +603,10 @@ bool syncRTCirq() {
 // connect to MQTT broker
 bool connectToMQTT() {
     // Force the underlying WiFi socket to time out after 5 seconds
-    wifiClient.setTimeout(5000);
+    wifiClient.setTimeout(15000);
 
     // Set MQTT keepAlive to 15 seconds, cleanSession true, timeout 5000ms
-    mqtt.setOptions(15, true, 5000);
+    mqtt.setOptions(60, true, 15000);
 
     // Connect to the MQTT broker
     mqtt.begin(MQTT_BROKER_ADRRESS, MQTT_PORT, wifiClient);
