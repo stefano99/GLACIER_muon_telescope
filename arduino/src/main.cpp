@@ -168,6 +168,8 @@ void setup() {
 void loop() {
     delay(LOOPPERIOD);  // small delay to avoid busy wait
     bool sdwrite_status = false;
+    
+    publisher.mqttLoop(); // ensure MQTT client is running
 
     // sync RTC DS1307 with NTP if needed
     // if RTC crashed, try reinitialize and sync
@@ -194,7 +196,6 @@ void loop() {
     }
     
     if(publisher.isRTCirqFlagSetMuon()) {
-        publisher.mqttLoop(); // ensure MQTT client is running
 
         #if DEBUG == 1 
         Serial.println("loop: RTC IRQ flag is set, sending muon sensor payload");
