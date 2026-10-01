@@ -181,9 +181,12 @@ void loop() {
     String timestamp = intclk.getDate();
 
     #if DEBUG == 1
-        Serial.println("loop: current internal RTC time is: " + intclk.getDate());
+        Serial.println("loop: current internal RTC time is: " + timestamp);\
+        intclk.sync(publisher.getNTPUnix());  
+        Serial.println("loop: post-sync internal RTC time is: " + timestamp);
     #endif
-    
+
+
     // sync RTC DS1307 with NTP if needed
     // if RTC crashed, try reinitialize and sync
     // if (publisher.getRTCTimestamp() == "") {

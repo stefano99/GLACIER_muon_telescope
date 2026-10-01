@@ -219,7 +219,9 @@ bool waitForNTP(unsigned long timeoutMs) {
 }
 
 int Publisher_mqtt::getNTPUnix() {
-    waitForNTP(50);
+    if(!waitForNTP(50)) {
+        return 0;
+    }
     #if DEBUG == 1
         Serial.println("mqtt: ntp time unix: " + String(WiFi.getTime()));
     #endif
