@@ -22,6 +22,7 @@ class Publisher_mqtt{
         bool begin();
 
         String getNTPTimestamp();
+        int getNTPUnix();
 
         String getRTCTimestamp();
         bool isRTCirqFlagSetMuon();

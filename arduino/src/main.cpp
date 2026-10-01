@@ -13,6 +13,7 @@
 #include "muonSensor.h"
 #include "publisher_mqtt.h"
 #include "sdcard.h"
+#include "clock_internal.hpp"
 
 
 // constants here:
@@ -35,6 +36,8 @@ DHT_Unified dht22(DHT22PIN, DHTTYPE);
 sensors_event_t event;
 // MQTT publisher object
 Publisher_mqtt publisher("glacier-sasso/send","glacier-sasso/receive");
+// internal clock
+Clock_internal intclk;
 //muon sensor object
 muonSensor muon(2, MUONCOINCIDENCEPIN, "muon-detector-v1", false);
 // SD card object
@@ -111,6 +114,9 @@ void setup() {
 
     status_publisher = retryInit("publisher", [&]() { return publisher.begin(); });
     logMessage["status_publisher"] = status_publisher;
+
+    intclk.begin();
+    intclk.sync(publisher.getNTPUnix());
 
     interrupts();  // enable interrupts from sensors
 

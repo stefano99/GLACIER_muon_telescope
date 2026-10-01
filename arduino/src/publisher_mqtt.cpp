@@ -218,6 +218,15 @@ bool waitForNTP(unsigned long timeoutMs) {
     return false;
 }
 
+int Publisher_mqtt::getNTPUnix() {
+    waitForNTP(50);
+    #if DEBUG == 1
+        Serial.println("mqtt: ntp time unix: " + String(WiFi.getTime()));
+    #endif
+    auto unixTime = WiFi.getTime();
+    return unixTime;
+}
+
 
 ////////////////////////
 // RTC DS1307 section //
