@@ -281,6 +281,14 @@ void loop() {
         logMessage["message"] = "SD write status for muon data";
         logMessage["sdwrite_status"] = sdwrite_status;
 
+        logMessage["timestamp"] = timestamp;
+
+        int ntp = publisher.getNTPUnix();
+        intclk.sync(ntp);
+        timestamp = intclk.getDate();
+
+        logMessage["internal-rtc-updated"] = timestamp;
+
         publisher.send(logMessage); // send SD write status message
         logMessage.clear();
     }
@@ -305,15 +313,6 @@ void loop() {
             #endif
             logMessage["rtc_resynced"] = false;
         }
-
-        logMessage["timestamp"] = timestamp;
-
-
-        int ntp = publisher.getNTPUnix();
-        intclk.sync(ntp);
-        timestamp = intclk.getDate();
-
-        logMessage["timestamp_sync"] = timestamp;
 
         #if DEBUG == 1 
         Serial.println("loop: Daily RTC IRQ flag is set, performing daily tasks");
