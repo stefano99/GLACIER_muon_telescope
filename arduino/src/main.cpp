@@ -281,8 +281,6 @@ void loop() {
         logMessage["message"] = "SD write status for muon data";
         logMessage["sdwrite_status"] = sdwrite_status;
 
-        logMessage["timestamp"] = timestamp;
-
         int ntp = publisher.getNTPUnix();
         intclk.sync(ntp);
         timestamp = intclk.getDate();
