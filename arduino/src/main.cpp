@@ -7,6 +7,7 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
+#include <ctime>
 
 #include "sensor.h" 
 #include "tempSensor.h"
@@ -177,29 +178,35 @@ void loop() {
     
     publisher.mqttLoop(); // ensure MQTT client is running
 
+    String timestamp = intclk.getDate();
+
+    #if DEBUG == 1
+        Serial.println("loop: current internal RTC time is: " + intclk.getDate());
+    #endif
+    
     // sync RTC DS1307 with NTP if needed
     // if RTC crashed, try reinitialize and sync
-    if (publisher.getRTCTimestamp() == "") {
-        #if DEBUG == 1 
-        Serial.println("loop: RTC DS1307 crashed, trying to reinitialize and sync with NTP.");
-        #endif
-        logMessage["id"] = DEVICE_ID;
-        logMessage["type"] = "log";
-        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
-        logMessage["message"] = "RTC DS1307 reinitialization attempt";
+    // if (publisher.getRTCTimestamp() == "") {
+    //     #if DEBUG == 1 
+    //     Serial.println("loop: RTC DS1307 crashed, trying to reinitialize and sync with NTP.");
+    //     #endif
+    //     logMessage["id"] = DEVICE_ID;
+    //     logMessage["type"] = "log";
+    //     logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+    //     logMessage["message"] = "RTC DS1307 reinitialization attempt";
         
-        if(publisher.sync()) {
-            logMessage["rtc_reinitialized"] = true;
-        }
-        else {
-            logMessage["rtc_reinitialized"] = false;
-        }
+    //     if(publisher.sync()) {
+    //         logMessage["rtc_reinitialized"] = true;
+    //     }
+    //     else {
+    //         logMessage["rtc_reinitialized"] = false;
+    //     }
 
-        sdwrite_status = sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
-        logMessage["sdwrite_status"] = sdwrite_status;
-        publisher.send(logMessage); // send RTC reinit status message
-        logMessage.clear();
-    }
+    //     sdwrite_status = sd.write(log_filename, logMessage.as<String>()); // log RTC reinit status to SD card
+    //     logMessage["sdwrite_status"] = sdwrite_status;
+    //     publisher.send(logMessage); // send RTC reinit status message
+    //     logMessage.clear();
+    // }
     
     if(publisher.isRTCirqFlagSetMuon()) {
 
@@ -207,7 +214,7 @@ void loop() {
         Serial.println("loop: RTC IRQ flag is set, sending muon sensor payload");
         #endif
 
-        String timestamp = publisher.getRTCTimestamp();
+        // String timestamp = publisher.getRTCTimestamp();
 
         message["id"] = DEVICE_ID;
         message["type"] = "muon";
@@ -228,7 +235,7 @@ void loop() {
 
         logMessage["id"] = DEVICE_ID;
         logMessage["type"] = "log";
-        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+        logMessage["timestamp"] = timestamp;
         logMessage["message"] = "SD write status for muon data";
         logMessage["sdwrite_status"] = sdwrite_status;
         
@@ -242,7 +249,7 @@ void loop() {
         Serial.println("loop: RTC IRQ flag is set, sending temperature sensor payload");
         #endif
 
-        String timestamp = publisher.getRTCTimestamp();
+        // String timestamp = publisher.getRTCTimestamp();
 
         // read temperature from sensors
         dht22.temperature().getEvent(&event);
@@ -270,7 +277,7 @@ void loop() {
         
         logMessage["id"] = DEVICE_ID;
         logMessage["type"] = "log";
-        logMessage["timestamp"] = publisher.getRTCTimestamp(); // use compile time as timestamp for log message if RTC is not working
+        logMessage["timestamp"] = timestamp;
         logMessage["message"] = "SD write status for muon data";
         logMessage["sdwrite_status"] = sdwrite_status;
 
@@ -299,7 +306,14 @@ void loop() {
             logMessage["rtc_resynced"] = false;
         }
 
-        logMessage["timestamp"] = publisher.getRTCTimestamp();
+        logMessage["timestamp"] = timestamp;
+
+
+        int ntp = publisher.getNTPUnix();
+        intclk.sync(ntp);
+        timestamp = intclk.getDate();
+
+        logMessage["timestamp_sync"] = timestamp;
 
         #if DEBUG == 1 
         Serial.println("loop: Daily RTC IRQ flag is set, performing daily tasks");
@@ -349,8 +363,10 @@ void loop() {
 
         publisher.clearRTCirqFlagDaily(); // clear daily RTC IRQ flag
 
+        timestamp = intclk.getDate();
+
         #if DEBUG == 1 
-        Serial.println("loop: Daily tasks done. time: " + publisher.getRTCTimestamp());
+        Serial.println("loop: Daily tasks done. time: " + timestamp);
         // display_freeram();
         #endif
         
